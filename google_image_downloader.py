@@ -1,4 +1,5 @@
 import configparser
+from os import path, makedirs
 from queue import Queue
 from shutil import copyfileobj
 from sys import argv
@@ -18,21 +19,25 @@ config.read('config.ini')
 api_key = config['google_image_downloader']['CustomSearchAPI_key']
 cx_key = config['google_image_downloader']['cx_key']
 
+
 def get_data():
     r = requests.get('https://www.googleapis.com/customsearch/v1?key={0}&cx={1}&q={2}&num={3}&searchType=image'
                      .format(api_key, cx_key, word, limit))
     jsn = r.json()
     return jsn['items']
 
+
 def download(title, mime, link):
     response = requests.get(link, stream=True)
     if response.status_code == 200:
         if mime == 'image/png':
-            filename = title + '.png'
+            filename = 'img/' + title + '.png'
         else:
-            filename = title + '.jpg'
+            filename = 'img/' + title + '.jpg'
         with open(filename, 'wb') as out_file:
+            response.raw.decode_content = True
             copyfileobj(response.raw, out_file)
+
 
 class DownloadWorker(Thread):
 
@@ -50,6 +55,8 @@ class DownloadWorker(Thread):
 
 def main():
     count = 1
+    if not path.exists('img'):
+        makedirs('img')
     queue = Queue()
     for _ in range(8):
         worker = DownloadWorker(queue)
