@@ -7,6 +7,6 @@
 Пример:
 
 ```shell
-python3 google_image_downloader.py test 10
+python3 google_image_downloader.py живопись 10
 ```
 
