@@ -1,4 +1,5 @@
 import configparser
+from math import ceil
 from os import path, makedirs
 from queue import Queue
 from shutil import copyfileobj
@@ -10,7 +11,8 @@ import requests
 links = []
 word = argv[1]
 try:
-    limit = argv[2]
+    limit = int(argv[2])/10
+    limit = ceil(limit)
 except IndexError:
     exit('Ошибка: не указан лимит изображений.')
 
@@ -20,9 +22,9 @@ api_key = config['google_image_downloader']['CustomSearchAPI_key']
 cx_key = config['google_image_downloader']['cx_key']
 
 
-def get_data():
-    r = requests.get('https://www.googleapis.com/customsearch/v1?key={0}&cx={1}&q={2}&num={3}&searchType=image'
-                     .format(api_key, cx_key, word, limit))
+def get_data(offset):
+    url = 'https://www.googleapis.com/customsearch/v1?key={0}&cx={1}&q={2}&searchType=image&start={3}'.format(api_key, cx_key, word, offset)
+    r = requests.get(url)
     jsn = r.json()
     if r.status_code == 400:
         exit('Response 400: проверьте правильность введенных ключей.')
@@ -65,10 +67,12 @@ def main():
         worker = DownloadWorker(queue)
         worker.daemon = True
         worker.start()
-    data = get_data()
-    for i in data:
-        queue.put((str(count), i['mime'], i['link']))
-        count += 1
+    print('Получаю список изображений...')
+    data = [get_data(i*10+1) for i in range(limit)]
+    for items in data:
+        for i in items:
+            queue.put((str(count), i['mime'], i['link']))
+            count += 1
     queue.join()
     print('Выполнено')
 
