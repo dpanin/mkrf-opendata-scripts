@@ -12,7 +12,7 @@ word = argv[1]
 try:
     limit = argv[2]
 except IndexError:
-    exit("Error: please, enter image download limit.")
+    exit('Ошибка: не указан лимит изображений.')
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -24,7 +24,10 @@ def get_data():
     r = requests.get('https://www.googleapis.com/customsearch/v1?key={0}&cx={1}&q={2}&num={3}&searchType=image'
                      .format(api_key, cx_key, word, limit))
     jsn = r.json()
-    return jsn['items']
+    if r.status_code == 400:
+        exit('Response 400: проверьте правильность введенных ключей.')
+    else:
+        return jsn['items']
 
 
 def download(title, mime, link):
