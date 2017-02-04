@@ -6,23 +6,28 @@ from sys import argv
 from threading import Thread
 import requests
 
+word = 'живопись'
+limit = 1000
 
 links = []
-word = argv[1]
+
+
+'''word = argv[1]
 try:
     limit = argv[2]
 except IndexError:
-    exit("Error: please, enter image download limit.")
+    exit("Error: please, enter image download limit.") '''
 
 config = configparser.ConfigParser()
 config.read('config.ini')
 api_key = config['google_image_downloader']['CustomSearchAPI_key']
 cx_key = config['google_image_downloader']['cx_key']
-
+print (api_key)
 
 def get_data():
-    r = requests.get('https://www.googleapis.com/customsearch/v1?key={0}&cx={1}&q={2}&num={3}&searchType=image'
-                     .format(api_key, cx_key, word, limit))
+    url = 'https://www.googleapis.com/customsearch/v1?key={0}&cx={1}&q={2}&num={3}&searchType=image'.format(api_key, cx_key, word, limit)
+    print (url)
+    r = requests.get(url)
     jsn = r.json()
     return jsn['items']
 
