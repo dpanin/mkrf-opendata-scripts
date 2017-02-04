@@ -89,4 +89,6 @@ ENV/
 .ropeproject
 
 # Temp files
+config.ini
 img/
+.idea/
