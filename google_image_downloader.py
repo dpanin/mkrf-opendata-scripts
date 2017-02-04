@@ -51,7 +51,7 @@ class DownloadWorker(Thread):
     def run(self):
         while True:
             title, mime, link = self.queue.get()
-            print('Processing: ' + title)
+            print('Обрабатываю изображение: ' + title)
             download(title, mime, link)
             self.queue.task_done()
 
@@ -70,7 +70,7 @@ def main():
         queue.put((str(count), i['mime'], i['link']))
         count += 1
     queue.join()
-    print('Done')
+    print('Выполнено')
 
 
 if __name__ == '__main__':
