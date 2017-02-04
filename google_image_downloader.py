@@ -6,30 +6,28 @@ from sys import argv
 from threading import Thread
 import requests
 
-word = 'живопись'
-limit = 1000
 
 links = []
-
-
-'''word = argv[1]
+word = argv[1]
 try:
     limit = argv[2]
 except IndexError:
-    exit("Error: please, enter image download limit.") '''
+    exit('Ошибка: не указан лимит изображений.')
 
 config = configparser.ConfigParser()
 config.read('config.ini')
 api_key = config['google_image_downloader']['CustomSearchAPI_key']
 cx_key = config['google_image_downloader']['cx_key']
-print (api_key)
+
 
 def get_data():
-    url = 'https://www.googleapis.com/customsearch/v1?key={0}&cx={1}&q={2}&num={3}&searchType=image'.format(api_key, cx_key, word, limit)
-    print (url)
-    r = requests.get(url)
+    r = requests.get('https://www.googleapis.com/customsearch/v1?key={0}&cx={1}&q={2}&num={3}&searchType=image'
+                     .format(api_key, cx_key, word, limit))
     jsn = r.json()
-    return jsn['items']
+    if r.status_code == 400:
+        exit('Response 400: проверьте правильность введенных ключей.')
+    else:
+        return jsn['items']
 
 
 def download(title, mime, link):
@@ -53,7 +51,7 @@ class DownloadWorker(Thread):
     def run(self):
         while True:
             title, mime, link = self.queue.get()
-            print('Processing: ' + title)
+            print('Обрабатываю изображение: ' + title)
             download(title, mime, link)
             self.queue.task_done()
 
@@ -72,7 +70,7 @@ def main():
         queue.put((str(count), i['mime'], i['link']))
         count += 1
     queue.join()
-    print('Done')
+    print('Выполнено')
 
 
 if __name__ == '__main__':
